@@ -1,12 +1,30 @@
-import type { Card, PlayerId } from './types';
+import type { Card, PlayerId, Round, Trick } from './types';
 
 export function dealHands(deck: Card[]): Record<PlayerId, Card[]> {
   const hands: Record<PlayerId, Card[]> = { 0: [], 1: [], 2: [], 3: [] };
 
-  // TODO(human): deal `deck` round-robin into `hands` — one card at a time
-  // per player, in player order (0, 1, 2, 3, 0, 1, 2, ...), until the deck
-  // is exhausted. For a standard 52-card deck this gives each player 13
-  // cards, but round-robin also handles a deck that doesn't divide evenly.
+  for (let i = 0; i < deck.length; i++) {
+    const playerId: PlayerId = (i % 4) as PlayerId;
+    hands[playerId].push(deck[i]);
+  }
 
   return hands;
+}
+
+export function initializeRound<TBid>(dealerId: PlayerId, deck: Card[]): Round<TBid> {
+  const hands = dealHands(deck);
+  dealerId = (dealerId % 4) as PlayerId; // Ensure dealerId is valid
+  const currentTrick: Trick = {
+    leadSuit: null,
+    plays: [],
+    winnerId: null,
+  };
+
+  return {
+    dealerId,
+    hands,
+    bids: {},
+    tricks: [],
+    currentTrick,
+  };
 }

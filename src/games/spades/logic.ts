@@ -36,11 +36,15 @@ export function evaluateTrick(plays: TrickPlay[]): PlayerId {
  * Determine which cards from a hand are legal to play.
  * You must follow the lead suit if you have a card of that suit;
  * otherwise any card (including spades) is legal.
- * A null leadSuit means this play is leading the trick — any card is legal.
+ * A null leadSuit means this play is leading the trick: any card is legal,
+ * except that spades can't be led until they're broken (a spade has been
+ * played on an earlier trick) — unless the hand holds nothing but spades.
  */
-export function getLegalPlays(hand: Card[], leadSuit: Suit | null): Card[] {
+export function getLegalPlays(hand: Card[], leadSuit: Suit | null, spadesBroken: boolean): Card[] {
   if (leadSuit === null) {
-    return hand;
+    if (spadesBroken) return hand;
+    const nonSpades = hand.filter((card) => card.suit !== 'spades');
+    return nonSpades.length > 0 ? nonSpades : hand;
   }
   const followSuit = hand.filter((card) => card.suit === leadSuit);
   return followSuit.length > 0 ? followSuit : hand;
@@ -60,9 +64,10 @@ function beats(candidate: Card, currentBest: Card, leadSuit: Suit): boolean {
   return candidate.suit === leadSuit && candidate.rank > currentBest.rank;
 }
 
-export interface BidContext {
+export interface PlayContext {
   bid: number;
   tricksWonSoFar: number;
+  spadesBroken: boolean;
 }
 
 /**
@@ -94,9 +99,9 @@ export function chooseCardToPlay(
   hand: Card[],
   leadSuit: Suit | null,
   currentPlays: TrickPlay[],
-  { bid, tricksWonSoFar }: BidContext
+  { bid, tricksWonSoFar, spadesBroken }: PlayContext
 ): Card {
-  const legal = getLegalPlays(hand, leadSuit);
+  const legal = getLegalPlays(hand, leadSuit, spadesBroken);
   const needsMoreTricks = tricksWonSoFar < bid;
 
   if (leadSuit === null || currentPlays.length === 0) {

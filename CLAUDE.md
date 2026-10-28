@@ -8,8 +8,12 @@ Built engine-first: pure game logic lives in `src/engine/`, framework-agnostic (
 
 - `src/engine/types.ts` — core domain types: `Card`, `Suit`, `Rank`, `Player`, `Trick`, `Round`, `GamePhase`
 - `src/engine/deck.ts` — `buildDeck()`, `shuffle()` (both done, with real test assertions)
-- `src/engine/deal.ts` — `dealHands()` (in progress, see below)
-- `src/games/*`, `src/ai/spades`, `src/tutorial/lessons`, `src/ui/*` — scaffolded, not yet implemented
+- `src/engine/deal.ts` — `dealHands()`, `initializeRound()`
+- `src/games/spades/` — rules (`logic.ts`), bidding, scoring, hints, and `interactiveRound.ts` (pure round state machine: bidding → playing)
+- `src/state/gameStore.ts` — Zustand store: deal, bid, play, cumulative scoring to 500
+- `src/ui/` — `components/{Card,Hand,Table,BiddingPanel,ScoreBoard}`, `screens/GameScreen.tsx`, `game.css`
+- `src/ai/spades`, `src/tutorial/lessons`, `src/games/{euchre,bidwhist,ers}` — scaffolded, not yet implemented
+- `specs/` — one spec per milestone; acceptance criteria IDs (`AC-n`) appear in test names
 
 ## Conventions
 
@@ -19,8 +23,8 @@ Built engine-first: pure game logic lives in `src/engine/`, framework-agnostic (
 
 ## Working style
 
-The user is implementing core engine functions (starting with the Fisher-Yates shuffle) themselves as a hands-on learning exercise. When reviewing this code, explain what's wrong and why rather than rewriting it directly — let them apply the fix.
+The user originally implemented core engine functions themselves as a hands-on learning exercise. As of 2026-10-27 hands-on "Learn by Doing" hand-offs are **off until the user asks for them again** — build features directly. When they do turn it back on: explain what's wrong and why rather than rewriting directly, and let them apply the fix.
 
-## Current status (as of 2026-09-20)
+## Current status (as of 2026-10-27)
 
-`buildDeck()` and `shuffle()` in `deck.ts` are done and well-tested (`deck.test.ts`). Now building `dealHands()` in `deal.ts` — deals a shuffled deck round-robin into 4 hands.
+v2 is built (specs 001–003): Card component with CSS-drawn faces, spades-broken rule, human bidding with a suggested bid, legal-play hints, and a felt table layout. Card art is the user's own blue-and-gold "aggie" deck in `public/cards/` (light) and `public/cards/dark/`, named `${card.id}.svg`; its license is still TODO in `public/cards/LICENSE.md`. v3 candidates are listed in `specs/README.md`.

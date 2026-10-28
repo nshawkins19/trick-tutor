@@ -13,8 +13,7 @@ export function buildDeck(): Card[] {
   return deck;
 }
 
-// TODO(human): implement shuffle(deck)
-// Should return a NEW array containing the same 52 cards in random order
+// Fisher-Yates shuffle. Returns a NEW array containing the same 52 cards in random order
 // (don't mutate the input — the caller may still hold a reference to the
 // original deck, e.g. for tests that check "same cards, different order").
 export function shuffle(deck: Card[]): Card[] {
@@ -27,7 +26,7 @@ export function shuffle(deck: Card[]): Card[] {
       newDeck[spot] = swapCardPlaceholder;
   }
 
-  return newDeck; // method stub
+  return newDeck;
 }
 
 

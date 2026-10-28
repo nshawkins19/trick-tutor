@@ -1,0 +1,657 @@
+.game {
+  --felt: #1d6b3c;
+  --felt-dark: #134a29;
+  --felt-text: #f1f7f2;
+  --gold: #ffd54a;
+  --team-a: #4f8cff;
+  --team-b: #ff7a59;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  min-height: 100svh;
+}
+
+/* ---------- buttons & chips ---------- */
+
+.button {
+  align-self: center;
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+  &:focus-visible {
+    outline: 3px solid var(--accent-border);
+    outline-offset: 2px;
+  }
+}
+
+.button--quiet {
+  background: transparent;
+  color: var(--text-h);
+  border-color: var(--border);
+  padding: 6px 14px;
+  font-weight: 500;
+}
+
+.chip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--felt-text);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.chip--team-A {
+  background: var(--team-a);
+}
+.chip--team-B {
+  background: var(--team-b);
+}
+.chip--dealer {
+  background: var(--gold);
+  color: #3a2c00;
+}
+.chip--broken {
+  background: var(--gold);
+  color: #3a2c00;
+}
+
+/* ---------- scoreboard ---------- */
+
+.scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.scoreboard__actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* ---------- settings ---------- */
+
+.settings {
+  position: relative;
+
+  summary {
+    list-style: none;
+    cursor: pointer;
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+}
+.settings__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  width: 260px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+.settings__help {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text-h);
+  font-weight: 600;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+}
+.switch__track {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.15s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
+  }
+}
+.switch input:checked + .switch__track {
+  background: var(--accent);
+
+  &::after {
+    transform: translateX(18px);
+  }
+}
+.switch input:focus-visible + .switch__track {
+  outline: 3px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+.scoreboard__title {
+  font-weight: 700;
+  color: var(--text-h);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.scoreboard__logo {
+  color: var(--accent);
+}
+.scoreboard__meta {
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.scoreboard__teams {
+  display: flex;
+  gap: 12px;
+}
+
+.team-score {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 10px;
+  align-items: baseline;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--team-a);
+  text-align: left;
+}
+.team-score--B {
+  border-left-color: var(--team-b);
+}
+.team-score__name {
+  grid-column: 1 / -1;
+  font-size: 12px;
+}
+.team-score__points {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+.team-score__bags {
+  font-size: 12px;
+}
+
+/* ---------- table ---------- */
+
+.table {
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 1.4fr) 1fr;
+  grid-template-areas:
+    'info  top   last'
+    'left  trick right'
+    '.     you   .';
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at center, var(--felt) 0%, var(--felt-dark) 100%);
+  box-shadow: inset 0 0 0 6px #5b3a1e, inset 0 0 0 9px #3d2612, var(--shadow);
+  color: var(--felt-text);
+}
+
+.table__info {
+  grid-area: info;
+  align-self: start;
+  justify-self: start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  padding: 6px 4px;
+
+  .chip {
+    margin-left: 0;
+  }
+}
+
+/* ---------- seats ---------- */
+
+.seat {
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 2px solid transparent;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.seat--top {
+  grid-area: top;
+}
+.seat--left {
+  grid-area: left;
+}
+.seat--right {
+  grid-area: right;
+}
+.seat--bottom {
+  grid-area: you;
+}
+
+.seat--active {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(255, 213, 74, 0.45);
+}
+
+.seat__name {
+  font-weight: 700;
+}
+.seat__bid {
+  font-size: 13px;
+  opacity: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.seat__cards {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  --card-sm: 30px;
+}
+.seat__fan {
+  display: flex;
+  padding-left: 22px;
+
+  .card {
+    margin-left: -22px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+}
+.seat__count {
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 2ch;
+}
+
+/* ---------- tricks ---------- */
+
+.trick {
+  grid-area: trick;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, var(--card-md, 72px));
+  grid-template-rows: repeat(3, calc(var(--card-md, 72px) * 0.75));
+  grid-template-areas:
+    '.    top    .'
+    'left center right'
+    '.    bottom .';
+  justify-content: center;
+  align-content: center;
+  min-height: calc(var(--card-md, 72px) * 3);
+}
+
+.trick__slot {
+  display: grid;
+  place-items: center;
+}
+.trick__slot--top {
+  grid-area: top;
+}
+.trick__slot--left {
+  grid-area: left;
+}
+.trick__slot--right {
+  grid-area: right;
+}
+.trick__slot--bottom {
+  grid-area: bottom;
+}
+
+.trick__slot--winner .card {
+  box-shadow:
+    0 0 0 3px var(--gold),
+    0 0 18px rgba(255, 213, 74, 0.6);
+}
+
+.trick__prompt {
+  grid-area: center;
+  align-self: center;
+  justify-self: center;
+  white-space: nowrap;
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.last-trick {
+  grid-area: last;
+  justify-self: end;
+  align-self: start;
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 12px;
+  text-align: center;
+}
+.last-trick__title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.last-trick__empty {
+  opacity: 0.7;
+  padding: 8px 12px;
+}
+.trick--mini {
+  --card-md: 30px;
+  --card-sm: 30px;
+  min-height: 0;
+  grid-template-rows: repeat(3, 26px);
+}
+.last-trick__winner {
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ---------- player area ---------- */
+
+.player-area {
+  /* Fit 13 cards, each overlapping half of the one before: total width = 7 cards. */
+  --hand-overlap: 0.5;
+  --card-md: min(132px, calc((min(100vw, 1126px) - 48px) / 7));
+
+  /* Pinned to the bottom of the screen so your hand never scrolls out of view. */
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 0 -16px -16px;
+  padding: 16px 16px 12px;
+  background: linear-gradient(to bottom, transparent, var(--bg) 28px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-line {
+  min-height: 1.5em;
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.hand {
+  display: flex;
+  justify-content: center;
+  padding: 26px 0 4px calc(var(--card-md, 72px) * var(--hand-overlap));
+  max-width: 100%;
+  box-sizing: border-box;
+
+  .card {
+    margin-left: calc(var(--card-md, 72px) * var(--hand-overlap) * -1);
+  }
+  /* Legal cards sit a little higher so they stand out without relying on dimming. */
+  .card--playable {
+    transform: translateY(-14px);
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-28px);
+    }
+  }
+}
+
+/* ---------- bidding ---------- */
+
+.bidding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  max-width: 640px;
+}
+.bidding__title {
+  margin: 0;
+  font-size: 20px;
+}
+.bidding__context,
+.bidding__hint {
+  font-size: 14px;
+}
+.bidding__options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.bid-button {
+  font: inherit;
+  font-weight: 600;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+
+  &:hover {
+    border-color: var(--accent);
+  }
+  &:focus-visible {
+    outline: 3px solid var(--accent-border);
+    outline-offset: 1px;
+  }
+}
+.bid-button--suggested {
+  border: 2px solid var(--accent);
+  background: var(--accent-bg);
+}
+
+/* ---------- between rounds ---------- */
+
+.between-rounds {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.welcome {
+  max-width: 520px;
+
+  p {
+    margin-top: 8px;
+  }
+}
+
+.winner-banner {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-h);
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: var(--accent-bg);
+}
+
+.summary {
+  width: 100%;
+  max-width: 720px;
+  text-align: left;
+
+  h2 {
+    text-align: center;
+  }
+}
+.summary__teams {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+.summary__team {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 15px;
+}
+.summary__team-name {
+  font-weight: 700;
+  color: var(--text-h);
+}
+.summary__points--made {
+  color: #1e8e3e;
+  font-weight: 700;
+}
+.summary__points--set {
+  color: #d93025;
+  font-weight: 700;
+}
+
+.summary__players {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+
+  th,
+  td {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    text-align: right;
+  }
+  thead th:not(:first-child) {
+    text-align: right;
+  }
+}
+
+.summary__log {
+  margin-top: 12px;
+
+  summary {
+    cursor: pointer;
+    color: var(--text-h);
+    font-weight: 600;
+  }
+  ol {
+    padding-left: 24px;
+  }
+}
+.summary__trick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0;
+}
+.summary__play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  padding: 2px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+}
+.summary__play--winner {
+  border-color: var(--gold);
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 640px) {
+  .game {
+    padding: 12px 8px;
+    gap: 12px;
+  }
+
+  .table {
+    --card-md: 48px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      'info  .     last'
+      'top   top   top'
+      'left  trick right'
+      'you   you   you';
+    gap: 8px;
+    padding: 12px 8px;
+    border-radius: 16px;
+  }
+
+  .seat {
+    padding: 6px 8px;
+  }
+  .seat--left,
+  .seat--right {
+    .seat__cards {
+      display: none;
+    }
+  }
+  .seat__name .chip--team-A,
+  .seat__name .chip--team-B {
+    display: none;
+  }
+
+  .player-area {
+    /* Overlap more on phones: total width = 1 + 12 × 0.38 ≈ 5.6 cards. */
+    --hand-overlap: 0.62;
+    --card-md: min(72px, calc((100vw - 24px) / 5.6));
+    margin: 0 -8px -12px;
+    padding: 12px 8px 8px;
+  }
+  .hand .card--playable {
+    transform: translateY(-10px);
+  }
+
+  .summary__teams {
+    grid-template-columns: 1fr;
+  }
+}

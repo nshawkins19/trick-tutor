@@ -16,7 +16,7 @@ describe('deck', () => {
     const sortedOriginal = original.toSorted(byId);
     const sortedShuffled = shuffled.toSorted(byId);
 
-    // TODO(human): add assertions here. Check that:
+    // Checks that:
     // 1. `shuffled` is a different array reference than `original`
       expect(original).not.toBe(shuffled);
     // 2. `original` is unchanged (still matches `originalIds`) — shuffle must not mutate its input

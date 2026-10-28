@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Card, TrickPlay } from '../../engine/types';
-import { chooseCardToPlay, evaluateTrick } from './logic';
+import { chooseCardToPlay, evaluateTrick, getLegalPlays } from './logic';
 
 function card(suit: Card['suit'], rank: Card['rank']): Card {
   return { suit, rank, id: `${suit}-${rank}` };
@@ -41,9 +41,9 @@ describe('Spades logic', () => {
   });
 
   // Still needs tricks to make its bid (tricksWonSoFar < bid)
-  const stillBidding = { bid: 3, tricksWonSoFar: 0 };
+  const stillBidding = { bid: 3, tricksWonSoFar: 0, spadesBroken: true };
   // Already made its bid (tricksWonSoFar >= bid) — extra tricks are just bags
-  const bidAlreadyMade = { bid: 2, tricksWonSoFar: 2 };
+  const bidAlreadyMade = { bid: 2, tricksWonSoFar: 2, spadesBroken: true };
 
   it('chooseCardToPlay leads with the highest non-spade card, saving spades', () => {
     const hand = [card('spades', 14), card('hearts', 9), card('clubs', 4)];
@@ -93,5 +93,37 @@ describe('Spades logic', () => {
     const hand = [card('hearts', 10), card('hearts', 13)];
     const currentPlays: TrickPlay[] = [{ playerId: 0, card: card('hearts', 9) }];
     expect(chooseCardToPlay(hand, 'hearts', currentPlays, bidAlreadyMade)).toEqual(card('hearts', 10));
+  });
+
+  describe('spades broken (spec 002)', () => {
+    const mixedHand = [card('spades', 14), card('hearts', 3), card('clubs', 9)];
+    const allSpades = [card('spades', 2), card('spades', 9)];
+    const ids = (cards: Card[]) => cards.map((c) => c.id);
+
+    it('AC-1: cannot lead a spade before spades are broken', () => {
+      expect(ids(getLegalPlays(mixedHand, null, false))).toEqual(['hearts-3', 'clubs-9']);
+    });
+
+    it('AC-2: may lead a spade before they are broken if the hand is all spades', () => {
+      expect(getLegalPlays(allSpades, null, false)).toEqual(allSpades);
+    });
+
+    it('AC-3: may lead anything once spades are broken', () => {
+      expect(getLegalPlays(mixedHand, null, true)).toEqual(mixedHand);
+    });
+
+    it('AC-4: may trump with a spade when void in the lead suit, even before spades are broken', () => {
+      expect(getLegalPlays(mixedHand, 'diamonds', false)).toEqual(mixedHand);
+    });
+
+    it('AC-4: still must follow suit before spades are broken', () => {
+      expect(ids(getLegalPlays(mixedHand, 'hearts', false))).toEqual(['hearts-3']);
+    });
+
+    it('AC-5: a bot that has already made its bid does not lead its low spade before spades are broken', () => {
+      const hand = [card('spades', 2), card('hearts', 9), card('clubs', 7)];
+      const unbroken = { ...bidAlreadyMade, spadesBroken: false };
+      expect(chooseCardToPlay(hand, null, [], unbroken)).toEqual(card('clubs', 7));
+    });
   });
 });

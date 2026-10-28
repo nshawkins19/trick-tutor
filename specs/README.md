@@ -24,5 +24,6 @@ v2 = 001 + 002 + 003.
 | 003 | [Table layout](003-table-layout.md)                        | done |
 | 004 | [Play animation, paced bots, settings](004-play-animation-and-settings.md) | done |
 | 005 | [Side-panel layout, no-scroll desktop, phone landscape](005-layout-side-panel.md) | done |
+| 006 | [Dedicated phone portrait layout](006-phone-portrait.md) | done |
 
 Planned for v3: nil / blind-nil bids, bots that read their partner's bid, first tutorial lesson and coach tips.

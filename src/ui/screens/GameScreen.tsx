@@ -90,7 +90,12 @@ function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scor
   return (
     <>
       <main className="game__main">
-        <Table round={round} holdingTrick={holdingTrick} overlay={biddingPanel} />
+        <Table
+          round={round}
+          holdingTrick={holdingTrick}
+          overlay={biddingPanel}
+          corners={<RoundInfo round={round} holdingTrick={holdingTrick} />}
+        />
         <div className="player-area">
           <p className="status-line" role="status">
             {round.phase === 'bidding' && myTurn ? 'Your bid — use the panel on the table.' : statusText(round, holdingTrick)}
@@ -104,7 +109,9 @@ function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scor
       </main>
       <aside className="game__rail">
         {scoreboard}
-        <RoundInfo round={round} holdingTrick={holdingTrick} />
+        <div className="rail__round-info">
+          <RoundInfo round={round} holdingTrick={holdingTrick} />
+        </div>
       </aside>
     </>
   );

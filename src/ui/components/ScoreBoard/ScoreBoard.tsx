@@ -46,8 +46,8 @@ export function ScoreBoard({ teams, roundNumber, winningScore, onNewGame, round 
         ))}
       </div>
       <div className="scoreboard__actions">
-        <SettingsMenu />
-        <button type="button" className="button button--quiet" onClick={onNewGame}>
+        <SettingsMenu onNewGame={onNewGame} />
+        <button type="button" className="button button--quiet scoreboard__new-game" onClick={onNewGame}>
           New game
         </button>
       </div>
@@ -55,13 +55,18 @@ export function ScoreBoard({ teams, roundNumber, winningScore, onNewGame, round 
   );
 }
 
-function SettingsMenu() {
+function SettingsMenu({ onNewGame }: { onNewGame: () => void }) {
   const skipBotTurns = useSettingsStore((s) => s.skipBotTurns);
   const setSkipBotTurns = useSettingsStore((s) => s.setSkipBotTurns);
 
   return (
     <details className="settings">
-      <summary className="button button--quiet">Settings</summary>
+      <summary className="button button--quiet" aria-label="Settings">
+        <span className="settings__label">Settings</span>
+        <span className="settings__icon" aria-hidden="true">
+          ☰
+        </span>
+      </summary>
       <div className="settings__panel">
         <label className="switch">
           <input
@@ -77,6 +82,10 @@ function SettingsMenu() {
           Bots play instantly and finished tricks aren't paused on the table. Check "Last trick" to see what
           happened.
         </p>
+        {/* On phones the standalone New game button is hidden, so it lives here. */}
+        <button type="button" className="button settings__new-game" onClick={onNewGame}>
+          New game
+        </button>
       </div>
     </details>
   );

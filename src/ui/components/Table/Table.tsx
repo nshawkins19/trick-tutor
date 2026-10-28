@@ -4,9 +4,20 @@ import type { InteractiveRoundState } from '../../../games/spades/interactiveRou
 import { Card, CardBack } from '../Card/Card';
 import { PLAYER_IDS, SEATS } from './seats';
 
-function bidText(round: InteractiveRoundState, playerId: PlayerId): string {
+function bidText(round: InteractiveRoundState, playerId: PlayerId): ReactNode {
   const bid = round.bids[playerId];
-  if (bid !== undefined) return `Bid ${bid} · Won ${round.tricksWonByPlayer[playerId]}`;
+  if (bid !== undefined) {
+    // Two pieces so a narrow seat can wrap "Bid 4" / "Won 1" onto separate lines.
+    return (
+      <>
+        <span>Bid {bid}</span>
+        <span className="seat__bid-sep" aria-hidden="true">
+          ·
+        </span>
+        <span>Won {round.tricksWonByPlayer[playerId]}</span>
+      </>
+    );
+  }
   if (round.phase === 'bidding' && round.currentPlayer === playerId) return 'Bidding…';
   return 'No bid yet';
 }
@@ -111,9 +122,14 @@ interface TableProps {
   holdingTrick?: boolean;
   /** Floats over the middle of the felt — used for the bidding panel. */
   overlay?: ReactNode;
+  /**
+   * Round status for the felt's empty top corners. Only shown on phones in
+   * portrait, where there's no room for the side panel's copy.
+   */
+  corners?: ReactNode;
 }
 
-export function Table({ round, holdingTrick = false, overlay }: TableProps) {
+export function Table({ round, holdingTrick = false, overlay, corners }: TableProps) {
   const tricksPlayed = round.completedTricks.length;
   const heldTrick = holdingTrick ? round.completedTricks[tricksPlayed - 1] : undefined;
 
@@ -123,6 +139,7 @@ export function Table({ round, holdingTrick = false, overlay }: TableProps) {
         <SeatBadge key={id} round={round} playerId={id} />
       ))}
       <CurrentTrick round={round} heldTrick={heldTrick} />
+      {corners && <div className="table__corners">{corners}</div>}
       {overlay && <div className="table__overlay">{overlay}</div>}
     </div>
   );

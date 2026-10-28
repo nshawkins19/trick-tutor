@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { PlayerId } from '../../../engine/types';
 import type { InteractiveRoundState } from '../../../games/spades/interactiveRound';
 import { getTeam, type Team } from '../../../games/spades/scoring';
@@ -60,9 +61,34 @@ function SettingsMenu({ onNewGame }: { onNewGame: () => void }) {
   const setSkipBotTurns = useSettingsStore((s) => s.setSkipBotTurns);
   const showCoaching = useSettingsStore((s) => s.showCoaching);
   const setShowCoaching = useSettingsStore((s) => s.setShowCoaching);
+  const menuOpen = useSettingsStore((s) => s.menuOpen);
+  const setMenuOpen = useSettingsStore((s) => s.setMenuOpen);
+  const menuRef = useRef<HTMLDetailsElement>(null);
+
+  // Close on a tap anywhere outside the menu, or on Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [menuOpen, setMenuOpen]);
 
   return (
-    <details className="settings">
+    <details
+      ref={menuRef}
+      className="settings"
+      open={menuOpen}
+      onToggle={(e) => setMenuOpen(e.currentTarget.open)}
+    >
       <summary className="button button--quiet" aria-label="Settings">
         <span className="settings__label">Settings</span>
         <span className="settings__icon" aria-hidden="true">
@@ -96,7 +122,14 @@ function SettingsMenu({ onNewGame }: { onNewGame: () => void }) {
           happened.
         </p>
         {/* On phones the standalone New game button is hidden, so it lives here. */}
-        <button type="button" className="button settings__new-game" onClick={onNewGame}>
+        <button
+          type="button"
+          className="button settings__new-game"
+          onClick={() => {
+            setMenuOpen(false);
+            onNewGame();
+          }}
+        >
           New game
         </button>
       </div>

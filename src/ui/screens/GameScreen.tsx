@@ -31,6 +31,8 @@ function useRoundPacing(round: InteractiveRoundState): boolean {
   const runBots = useGameStore((s) => s.runBots);
   const finishRound = useGameStore((s) => s.finishRound);
   const skipBotTurns = useSettingsStore((s) => s.skipBotTurns);
+  // The game pauses while the settings menu is open.
+  const paused = useSettingsStore((s) => s.menuOpen);
 
   // How many completed tricks have finished their "hold" in the center.
   const [shownTricks, setShownTricks] = useState(0);
@@ -39,7 +41,9 @@ function useRoundPacing(round: InteractiveRoundState): boolean {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
-    if (holdingTrick) {
+    if (paused) {
+      // Nothing moves until the menu closes; this effect re-runs then.
+    } else if (holdingTrick) {
       timer = setTimeout(() => withViewTransition(() => setShownTricks(tricksDone)), TRICK_HOLD_MS);
     } else if (round.roundOver) {
       finishRound();
@@ -48,12 +52,18 @@ function useRoundPacing(round: InteractiveRoundState): boolean {
       else timer = setTimeout(() => withViewTransition(advanceBot), botDelayMs(round));
     }
     return () => clearTimeout(timer);
-  }, [round, holdingTrick, tricksDone, skipBotTurns, advanceBot, runBots, finishRound]);
+  }, [round, holdingTrick, tricksDone, skipBotTurns, paused, advanceBot, runBots, finishRound]);
 
   return holdingTrick;
 }
 
-function statusText(round: InteractiveRoundState, holdingTrick: boolean, coaching: boolean): string {
+function statusText(
+  round: InteractiveRoundState,
+  holdingTrick: boolean,
+  coaching: boolean,
+  paused: boolean
+): string {
+  if (paused) return 'Paused — close the menu to keep playing.';
   if (holdingTrick) {
     const winnerId = round.completedTricks[round.completedTricks.length - 1].winnerId;
     return winnerId === HUMAN_PLAYER ? 'You won the trick!' : `${SEATS[winnerId ?? 0].name} won the trick.`;
@@ -72,9 +82,10 @@ function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scor
   const playCard = useGameStore((s) => s.playCard);
   const holdingTrick = useRoundPacing(round);
   const coaching = useSettingsStore((s) => s.showCoaching);
+  const paused = useSettingsStore((s) => s.menuOpen);
   const [biddingCollapsed, setBiddingCollapsed] = useState(false);
   const myHand = round.hands[HUMAN_PLAYER];
-  const myTurn = round.currentPlayer === HUMAN_PLAYER && !round.roundOver && !holdingTrick;
+  const myTurn = round.currentPlayer === HUMAN_PLAYER && !round.roundOver && !holdingTrick && !paused;
 
   const onBid = (bid: number) => withViewTransition(() => placeBid(bid));
   const onPlay = (card: Card) => withViewTransition(() => playCard(card));
@@ -101,7 +112,7 @@ function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scor
         />
         <div className="player-area">
           <p className="status-line" role="status">
-            {round.phase === 'bidding' && myTurn ? 'Your bid — use the panel on the table.' : statusText(round, holdingTrick, coaching)}
+            {round.phase === 'bidding' && myTurn ? 'Your bid — use the panel on the table.' : statusText(round, holdingTrick, coaching, paused)}
           </p>
           {round.phase === 'playing' && myTurn ? (
             <Hand cards={myHand} legal={legalPlaysForCurrentPlayer(round)} onPlay={onPlay} />

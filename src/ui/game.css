@@ -201,6 +201,9 @@
   }
 }
 .settings__panel {
+  /* Its own view-transition layer, painted after the cards, so a card
+     animation can never draw over the open menu. */
+  view-transition-name: settings-menu;
   position: absolute;
   left: 0;
   top: calc(100% + 6px);

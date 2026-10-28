@@ -1,22 +1,36 @@
-import type { Team } from '../../../games/spades/scoring';
+import type { PlayerId } from '../../../engine/types';
+import type { InteractiveRoundState } from '../../../games/spades/interactiveRound';
+import { getTeam, type Team } from '../../../games/spades/scoring';
 import type { TeamGameState } from '../../../state/gameStore';
 import { useSettingsStore } from '../../../state/settingsStore';
-import { TEAM_NAMES } from '../Table/seats';
+import { PLAYER_IDS, TEAM_NAMES } from '../Table/seats';
 
 interface ScoreBoardProps {
   teams: Record<Team, TeamGameState>;
   roundNumber: number;
   winningScore: number;
   onNewGame: () => void;
+  /** When a round is in progress, each team also shows its combined bid and tricks won. */
+  round?: InteractiveRoundState | null;
 }
 
-export function ScoreBoard({ teams, roundNumber, winningScore, onNewGame }: ScoreBoardProps) {
+function teamRoundLine(round: InteractiveRoundState, team: Team): string {
+  const players = PLAYER_IDS.filter((id: PlayerId) => getTeam(id) === team);
+  const won = players.reduce<number>((sum, id) => sum + round.tricksWonByPlayer[id], 0);
+  if (players.some((id) => round.bids[id] === undefined)) return 'Bidding…';
+  const bid = players.reduce<number>((sum, id) => sum + (round.bids[id] ?? 0), 0);
+  return `Bid ${bid} · Won ${won}`;
+}
+
+export function ScoreBoard({ teams, roundNumber, winningScore, onNewGame, round }: ScoreBoardProps) {
   return (
-    <header className="scoreboard">
+    <header className="panel scoreboard">
       <div className="scoreboard__title">
-        <span className="scoreboard__logo">♠</span> Trick Tutor
+        <span>
+          <span className="scoreboard__logo">♠</span> Trick Tutor
+        </span>
         <span className="scoreboard__meta">
-          Round {roundNumber} · first to {winningScore}
+          Round {roundNumber} · to {winningScore}
         </span>
       </div>
       <div className="scoreboard__teams">
@@ -27,6 +41,7 @@ export function ScoreBoard({ teams, roundNumber, winningScore, onNewGame }: Scor
             <div className="team-score__bags">
               {teams[team].bags} bag{teams[team].bags === 1 ? '' : 's'}
             </div>
+            {round && <div className="team-score__round">{teamRoundLine(round, team)}</div>}
           </div>
         ))}
       </div>

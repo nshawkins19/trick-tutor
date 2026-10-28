@@ -5,25 +5,49 @@ import { PLAYER_IDS, SEATS } from '../Table/seats';
 interface BiddingPanelProps {
   round: InteractiveRoundState;
   onBid: (bid: number) => void;
+  /** Collapsed shows just a small "Your bid" pill so the table and your hand are visible. */
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
 }
 
 const BID_OPTIONS = Array.from({ length: MAX_BID - MIN_BID + 1 }, (_, i) => MIN_BID + i);
 
-export function BiddingPanel({ round, onBid }: BiddingPanelProps) {
+export function BiddingPanel({ round, onBid, collapsed, onToggleCollapsed }: BiddingPanelProps) {
   const suggested = estimateBid(round.hands[HUMAN_PLAYER]);
+
+  if (collapsed) {
+    return (
+      <button type="button" className="bidding-pill" onClick={onToggleCollapsed} aria-expanded="false">
+        Your bid · suggested {suggested} <span aria-hidden="true">▴</span>
+      </button>
+    );
+  }
+
   const partnerBid = round.bids[2];
   const bidsSoFar = PLAYER_IDS.filter((id) => round.bids[id] !== undefined);
 
   return (
-    <div className="bidding">
-      <h2 className="bidding__title">How many tricks will you take?</h2>
+    <div className="bidding" role="dialog" aria-label="Choose your bid">
+      <div className="bidding__header">
+        <h2 className="bidding__title">How many tricks will you take?</h2>
+        <button
+          type="button"
+          className="bidding__collapse"
+          onClick={onToggleCollapsed}
+          aria-expanded="true"
+          aria-label="Hide bidding panel"
+          title="Hide to see the table"
+        >
+          Hide <span aria-hidden="true">▾</span>
+        </button>
+      </div>
       <p className="bidding__context">
         {bidsSoFar.length === 0
           ? "You're first to bid."
           : `Bids so far: ${bidsSoFar.map((id) => `${SEATS[id].name} ${round.bids[id]}`).join(', ')}.`}
         {partnerBid !== undefined && ` Your team's bid will be ${partnerBid} + yours.`}
       </p>
-      <div className="bidding__options" role="group" aria-label="Choose your bid">
+      <div className="bidding__options" role="group" aria-label="Bid amount">
         {BID_OPTIONS.map((bid) => (
           <button
             key={bid}

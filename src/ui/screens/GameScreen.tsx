@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { Card } from '../../engine/types';
 import { explainLegalPlays } from '../../games/spades/hints';
 import {
@@ -14,6 +14,7 @@ import { Hand } from '../components/Hand/Hand';
 import { RoundSummary } from '../components/ScoreBoard/RoundSummary';
 import { ScoreBoard } from '../components/ScoreBoard/ScoreBoard';
 import { SEATS, TEAM_NAMES } from '../components/Table/seats';
+import { RoundInfo } from '../components/Table/RoundInfo';
 import { Table } from '../components/Table/Table';
 import { withViewTransition } from '../viewTransition';
 import { TRICK_HOLD_MS, botDelayMs } from './pacing';
@@ -65,33 +66,46 @@ function statusText(round: InteractiveRoundState, holdingTrick: boolean): string
   return explainLegalPlays(round.hands[HUMAN_PLAYER], round.leadSuit, round.spadesBroken);
 }
 
-function ActiveRound({ round }: { round: InteractiveRoundState }) {
+function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scoreboard: ReactNode }) {
   const placeBid = useGameStore((s) => s.placeBid);
   const playCard = useGameStore((s) => s.playCard);
   const holdingTrick = useRoundPacing(round);
+  const [biddingCollapsed, setBiddingCollapsed] = useState(false);
   const myHand = round.hands[HUMAN_PLAYER];
   const myTurn = round.currentPlayer === HUMAN_PLAYER && !round.roundOver && !holdingTrick;
 
   const onBid = (bid: number) => withViewTransition(() => placeBid(bid));
   const onPlay = (card: Card) => withViewTransition(() => playCard(card));
 
+  const biddingPanel =
+    round.phase === 'bidding' && myTurn ? (
+      <BiddingPanel
+        round={round}
+        onBid={onBid}
+        collapsed={biddingCollapsed}
+        onToggleCollapsed={() => setBiddingCollapsed((c) => !c)}
+      />
+    ) : undefined;
+
   return (
     <>
-      <Table round={round} holdingTrick={holdingTrick} />
-      <div className="player-area">
-        {round.phase === 'bidding' && myTurn ? (
-          <BiddingPanel round={round} onBid={onBid} />
-        ) : (
+      <main className="game__main">
+        <Table round={round} holdingTrick={holdingTrick} overlay={biddingPanel} />
+        <div className="player-area">
           <p className="status-line" role="status">
-            {statusText(round, holdingTrick)}
+            {round.phase === 'bidding' && myTurn ? 'Your bid — use the panel on the table.' : statusText(round, holdingTrick)}
           </p>
-        )}
-        {round.phase === 'playing' && myTurn ? (
-          <Hand cards={myHand} legal={legalPlaysForCurrentPlayer(round)} onPlay={onPlay} />
-        ) : (
-          <Hand cards={myHand} />
-        )}
-      </div>
+          {round.phase === 'playing' && myTurn ? (
+            <Hand cards={myHand} legal={legalPlaysForCurrentPlayer(round)} onPlay={onPlay} />
+          ) : (
+            <Hand cards={myHand} />
+          )}
+        </div>
+      </main>
+      <aside className="game__rail">
+        {scoreboard}
+        <RoundInfo round={round} holdingTrick={holdingTrick} />
+      </aside>
     </>
   );
 }
@@ -100,45 +114,51 @@ export function GameScreen() {
   const { teams, history, winner, currentRound, dealRound, resetGame } = useGameStore();
   const lastEntry = history[history.length - 1];
 
+  const scoreboard = (
+    <ScoreBoard
+      teams={teams}
+      roundNumber={history.length + (currentRound ? 1 : 0) || 1}
+      winningScore={WINNING_SCORE}
+      onNewGame={resetGame}
+      round={currentRound}
+    />
+  );
+
   return (
     <div className="game">
-      <ScoreBoard
-        teams={teams}
-        roundNumber={history.length + (currentRound ? 1 : 0) || 1}
-        winningScore={WINNING_SCORE}
-        onNewGame={resetGame}
-      />
-
       {currentRound ? (
-        <ActiveRound round={currentRound} />
+        <ActiveRound round={currentRound} scoreboard={scoreboard} />
       ) : (
-        <div className="between-rounds">
-          {winner && (
-            <div className="winner-banner" role="status">
-              {winner === 'A' ? 'You and your partner win!' : `${TEAM_NAMES[winner]} win this one.`}
-            </div>
-          )}
-          {lastEntry ? (
-            <RoundSummary entry={lastEntry} roundNumber={history.length} />
-          ) : (
-            <div className="welcome">
-              <h1>Spades</h1>
-              <p>
-                You sit at the bottom with your partner across the table. Bid how many tricks you'll take, then try to
-                make it. Spades are always trump.
-              </p>
-            </div>
-          )}
-          {winner ? (
-            <button type="button" className="button" onClick={resetGame}>
-              New game
-            </button>
-          ) : (
-            <button type="button" className="button" onClick={() => withViewTransition(dealRound)}>
-              {lastEntry ? 'Deal next round' : 'Deal first round'}
-            </button>
-          )}
-        </div>
+        <>
+          <main className="game__main between-rounds">
+            {winner && (
+              <div className="winner-banner" role="status">
+                {winner === 'A' ? 'You and your partner win!' : `${TEAM_NAMES[winner]} win this one.`}
+              </div>
+            )}
+            {lastEntry ? (
+              <RoundSummary entry={lastEntry} roundNumber={history.length} />
+            ) : (
+              <div className="welcome">
+                <h1>Spades</h1>
+                <p>
+                  You sit at the bottom with your partner across the table. Bid how many tricks you'll take, then try
+                  to make it. Spades are always trump.
+                </p>
+              </div>
+            )}
+            {winner ? (
+              <button type="button" className="button" onClick={resetGame}>
+                New game
+              </button>
+            ) : (
+              <button type="button" className="button" onClick={() => withViewTransition(dealRound)}>
+                {lastEntry ? 'Deal next round' : 'Deal first round'}
+              </button>
+            )}
+          </main>
+          <aside className="game__rail">{scoreboard}</aside>
+        </>
       )}
     </div>
   );

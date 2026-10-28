@@ -5,13 +5,48 @@
   --gold: #ffd54a;
   --team-a: #4f8cff;
   --team-b: #ff7a59;
+  --bag: #ff9f43;
+  --rail-w: 300px;
+  --pad: 14px;
 
+  /* Exactly one screen tall: the table flexes, nothing scrolls on desktop. */
+  height: 100svh;
+  box-sizing: border-box;
+  padding: var(--pad);
+  gap: var(--pad);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--rail-w);
+  overflow: hidden;
+}
+
+.game__main {
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  gap: 4px;
+}
+
+.game__rail {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel {
   box-sizing: border-box;
-  min-height: 100svh;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.panel__title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-h);
+  text-transform: none;
 }
 
 /* ---------- buttons & chips ---------- */
@@ -72,20 +107,84 @@
   color: #3a2c00;
 }
 
-/* ---------- scoreboard ---------- */
+.chip--quiet {
+  background: var(--code-bg);
+  color: var(--text-h);
+}
+
+/* ---------- scoreboard (side panel) ---------- */
 
 .scoreboard {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 10px;
 }
-
+.scoreboard__title {
+  font-weight: 700;
+  color: var(--text-h);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.scoreboard__logo {
+  color: var(--accent);
+}
+.scoreboard__meta {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text);
+}
+.scoreboard__teams {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
 .scoreboard__actions {
   display: flex;
-  align-items: flex-start;
   gap: 8px;
+
+  > * {
+    flex: 1;
+  }
+  .button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.team-score {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 8px;
+  align-items: baseline;
+  padding: 6px 10px;
+  border-left: 4px solid var(--team-a);
+  background: var(--code-bg);
+  text-align: left;
+}
+.team-score--B {
+  border-left-color: var(--team-b);
+}
+.team-score__name {
+  grid-column: 1 / -1;
+  font-size: 12px;
+}
+.team-score__points {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+.team-score__bags {
+  font-size: 12px;
+}
+.team-score__round {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- settings ---------- */
@@ -103,7 +202,7 @@
 }
 .settings__panel {
   position: absolute;
-  right: 0;
+  left: 0;
   top: calc(100% + 6px);
   z-index: 20;
   width: 260px;
@@ -169,66 +268,22 @@
   outline-offset: 2px;
 }
 
-.scoreboard__title {
-  font-weight: 700;
-  color: var(--text-h);
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.scoreboard__logo {
-  color: var(--accent);
-}
-.scoreboard__meta {
-  font-weight: 400;
-  font-size: 14px;
-  color: var(--text);
-}
-
-.scoreboard__teams {
-  display: flex;
-  gap: 12px;
-}
-
-.team-score {
-  display: grid;
-  grid-template-columns: auto auto;
-  column-gap: 10px;
-  align-items: baseline;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--team-a);
-  text-align: left;
-}
-.team-score--B {
-  border-left-color: var(--team-b);
-}
-.team-score__name {
-  grid-column: 1 / -1;
-  font-size: 12px;
-}
-.team-score__points {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text-h);
-  font-variant-numeric: tabular-nums;
-}
-.team-score__bags {
-  font-size: 12px;
-}
-
 /* ---------- table ---------- */
 
 .table {
+  --card-md: clamp(52px, min(9.5svh, 9vw), 104px);
+
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1fr minmax(240px, 1.4fr) 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
-    'info  top   last'
-    'left  trick right'
-    '.     you   .';
-  gap: 12px;
+    '.    top   .'
+    'left trick right'
+    '.    you   .';
+  gap: 10px;
   padding: 16px;
   border-radius: 24px;
   background: radial-gradient(ellipse at center, var(--felt) 0%, var(--felt-dark) 100%);
@@ -236,19 +291,17 @@
   color: var(--felt-text);
 }
 
-.table__info {
-  grid-area: info;
-  align-self: start;
-  justify-self: start;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 13px;
-  padding: 6px 4px;
+/* Floats over the middle of the felt (the bidding panel). */
+.table__overlay {
+  position: absolute;
+  inset: 12px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 
-  .chip {
-    margin-left: 0;
+  > * {
+    pointer-events: auto;
   }
 }
 
@@ -317,10 +370,37 @@
   min-width: 2ch;
 }
 
+/* Won-trick pile: one slot per trick bid — filled when won, dashed while needed, orange for bags. */
+.won-pile {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  max-width: 140px;
+}
+.won-pile__slot {
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.won-pile__slot--won {
+  background: var(--gold);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.won-pile__slot--needed {
+  border: 1.5px dashed rgba(255, 255, 255, 0.55);
+}
+.won-pile__slot--bag {
+  background: var(--bag);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
 /* ---------- tricks ---------- */
 
 .trick {
   grid-area: trick;
+  align-self: center;
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, var(--card-md, 72px));
@@ -331,7 +411,10 @@
     '.    bottom .';
   justify-content: center;
   align-content: center;
-  min-height: calc(var(--card-md, 72px) * 3);
+  /* Cards are 1.4 widths tall but rows are 0.75, so the top and bottom cards
+     hang ~0.33 widths past the grid. Pad so that overhang is part of the box
+     and can't land on a seat. */
+  padding-block: calc(var(--card-md, 72px) * 0.33);
 }
 
 .trick__slot {
@@ -366,58 +449,64 @@
   opacity: 0.75;
 }
 
+/* ---------- round info + last trick (side panel) ---------- */
+
+.round-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-h);
+
+  .chip {
+    margin-left: 0;
+  }
+}
+
 .last-trick {
-  grid-area: last;
-  justify-self: end;
-  align-self: start;
-  padding: 8px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.22);
-  font-size: 12px;
   text-align: center;
-}
-.last-trick__title {
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-.last-trick__empty {
-  opacity: 0.7;
-  padding: 8px 12px;
+
+  .panel__title {
+    text-align: left;
+  }
 }
 .trick--mini {
-  --card-md: 30px;
-  --card-sm: 30px;
-  min-height: 0;
-  grid-template-rows: repeat(3, 26px);
+  --card-md: 48px;
+  --card-sm: 48px;
+  grid-template-rows: repeat(3, 36px);
+  /* Top and bottom cards stick out past their rows; make room so they don't cover the label. */
+  padding-block: 16px;
+}
+.last-trick__empty {
+  padding: 8px 0;
+  font-size: 14px;
 }
 .last-trick__winner {
-  margin-top: 4px;
+  margin-top: 6px;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--text-h);
 }
 
 /* ---------- player area ---------- */
 
 .player-area {
-  /* Fit 13 cards, each overlapping half of the one before: total width = 7 cards. */
+  /* Fit 13 cards, each overlapping half the one before (total = 7 card widths),
+     and never let the hand take more than ~a fifth of the screen height. */
   --hand-overlap: 0.5;
-  --card-md: min(132px, calc((min(100vw, 1126px) - 48px) / 7));
+  --card-md: min(132px, calc((100cqi - 24px) / 7), 16svh);
 
-  /* Pinned to the bottom of the screen so your hand never scrolls out of view. */
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
-  margin: 0 -16px -16px;
-  padding: 16px 16px 12px;
-  background: linear-gradient(to bottom, transparent, var(--bg) 28px);
-
+  container-type: inline-size;
+  flex: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
 }
 
 .status-line {
   min-height: 1.5em;
+  margin-top: 4px;
   color: var(--text-h);
   font-weight: 500;
 }
@@ -425,7 +514,7 @@
 .hand {
   display: flex;
   justify-content: center;
-  padding: 26px 0 4px calc(var(--card-md, 72px) * var(--hand-overlap));
+  padding: 22px 0 0 calc(var(--card-md, 72px) * var(--hand-overlap));
   max-width: 100%;
   box-sizing: border-box;
 
@@ -434,11 +523,11 @@
   }
   /* Legal cards sit a little higher so they stand out without relying on dimming. */
   .card--playable {
-    transform: translateY(-14px);
+    transform: translateY(-12px);
 
     &:hover,
     &:focus-visible {
-      transform: translateY(-28px);
+      transform: translateY(-22px);
     }
   }
 }
@@ -605,19 +694,270 @@
   border-color: var(--gold);
 }
 
-/* ---------- narrow screens ---------- */
+/* Bidding sits on the felt as a floating card; "Hide" shrinks it to a pill. */
+.bidding {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  max-width: min(700px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+}
+.bidding__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.bidding__collapse,
+.bidding-pill {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
 
-@media (max-width: 640px) {
+  &:focus-visible {
+    outline: 3px solid var(--accent-border);
+    outline-offset: 2px;
+  }
+}
+.bidding__collapse {
+  flex: none;
+  font-size: 13px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+}
+.bidding-pill {
+  padding: 10px 18px;
+  font-weight: 600;
+  border: 2px solid var(--gold);
+  background: var(--bg);
+  color: var(--text-h);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.between-rounds {
+  overflow-y: auto;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ---------- phone landscape: short and wide ---------- */
+
+@media (orientation: landscape) and (max-height: 520px) {
   .game {
-    padding: 12px 8px;
-    gap: 12px;
+    --rail-w: 210px;
+    --pad: 6px;
+    font-size: 14px;
+  }
+  .game__rail {
+    gap: 6px;
+    overflow-y: auto;
+  }
+  .panel {
+    padding: 6px 8px;
+    border-radius: 8px;
+  }
+  .scoreboard {
+    gap: 6px;
+  }
+  /* Every pixel of height counts here: drop the title row, shrink the score text. */
+  .scoreboard__title {
+    display: none;
+  }
+  .team-score {
+    padding: 3px 6px;
+    column-gap: 4px;
+  }
+  .team-score__name,
+  .team-score__bags,
+  .team-score__round {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .team-score__points {
+    font-size: 17px;
+  }
+  .scoreboard__actions .button {
+    padding: 3px 6px;
+    font-size: 12px;
+  }
+  .round-info {
+    font-size: 12px;
+  }
+  .panel__title {
+    margin-bottom: 0;
+    font-size: 12px;
   }
 
   .table {
-    --card-md: 48px;
+    --card-md: clamp(34px, 12svh, 56px);
+    /* Side seats run the full height; your badge tucks into the bottom-left corner. */
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      'left top   right'
+      'left trick right'
+      'you  trick right';
+    gap: 4px;
+    padding: 8px 10px;
+    border-radius: 14px;
+  }
+  .seat {
+    padding: 3px 6px;
+    gap: 2px;
+    border-radius: 8px;
+  }
+  .seat__cards,
+  .seat__name .chip--team-A,
+  .seat__name .chip--team-B {
+    display: none;
+  }
+  .seat__bid {
+    font-size: 11px;
+  }
+  .trick__prompt {
+    font-size: 12px;
+  }
+
+  .trick--mini {
+    --card-md: 30px;
+    --card-sm: 30px;
+    grid-template-rows: repeat(3, 22px);
+    padding-block: 10px;
+  }
+  .last-trick__winner {
+    margin-top: 2px;
+    font-size: 12px;
+  }
+
+  .player-area {
+    --card-md: min(96px, calc((100cqi - 16px) / 7), 15svh);
+  }
+  .status-line {
+    margin-top: 0;
+    font-size: 13px;
+  }
+  .hand {
+    padding-top: 12px;
+
+    .card--playable {
+      transform: translateY(-8px);
+      &:hover,
+      &:focus-visible {
+        transform: translateY(-14px);
+      }
+    }
+  }
+
+  .bidding {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .bidding__title {
+    font-size: 16px;
+  }
+  .bidding__context,
+  .bidding__hint {
+    font-size: 12px;
+  }
+  .bid-button {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* ---------- portrait phones and tablets: stack panel, table, hand ---------- */
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .game {
+    --pad: 8px;
+    height: auto;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+  .game__main {
+    flex: 1;
+  }
+  .game__rail {
+    order: -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+
+    .scoreboard {
+      grid-column: 1 / -1;
+    }
+  }
+  .panel {
+    padding: 8px 10px;
+  }
+  .scoreboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 8px;
+  }
+  .scoreboard__title {
+    white-space: nowrap;
+  }
+  .scoreboard__meta {
+    display: none;
+  }
+  .scoreboard__teams {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .scoreboard__actions .button {
+    padding: 3px 10px;
+    font-size: 13px;
+  }
+  .team-score {
+    padding: 4px 8px;
+  }
+  .team-score__name,
+  .team-score__bags,
+  .team-score__round {
+    font-size: 11px;
+  }
+  .team-score__points {
+    font-size: 18px;
+  }
+  .round-info {
+    font-size: 14px;
+  }
+  .last-trick .panel__title {
+    margin-bottom: 0;
+    font-size: 12px;
+  }
+  .last-trick__winner {
+    margin-top: 2px;
+    font-size: 12px;
+  }
+  .round-info {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .trick--mini {
+    --card-md: 28px;
+    --card-sm: 28px;
+    grid-template-rows: repeat(3, 21px);
+    padding-block: 9px;
+  }
+
+  .table {
+    --card-md: 44px;
+    min-height: 300px;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     grid-template-areas:
-      'info  .     last'
       'top   top   top'
       'left  trick right'
       'you   you   you';
@@ -625,9 +965,12 @@
     padding: 12px 8px;
     border-radius: 16px;
   }
-
   .seat {
     padding: 6px 8px;
+  }
+  .seat__bid {
+    font-size: 12px;
+    white-space: nowrap;
   }
   .seat--left,
   .seat--right {
@@ -639,13 +982,14 @@
   .seat__name .chip--team-B {
     display: none;
   }
+  .won-pile {
+    max-width: 90px;
+  }
 
   .player-area {
     /* Overlap more on phones: total width = 1 + 12 × 0.38 ≈ 5.6 cards. */
     --hand-overlap: 0.62;
-    --card-md: min(72px, calc((100vw - 24px) / 5.6));
-    margin: 0 -8px -12px;
-    padding: 12px 8px 8px;
+    --card-md: min(80px, calc((100cqi - 8px) / 5.6));
   }
   .hand .card--playable {
     transform: translateY(-10px);

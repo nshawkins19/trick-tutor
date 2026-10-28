@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { PlayerId, Trick, TrickPlay } from '../../../engine/types';
 import type { InteractiveRoundState } from '../../../games/spades/interactiveRound';
 import { Card, CardBack } from '../Card/Card';
@@ -10,9 +11,29 @@ function bidText(round: InteractiveRoundState, playerId: PlayerId): string {
   return 'No bid yet';
 }
 
+/**
+ * One slot per trick in the bid: filled when won, dashed while still needed.
+ * Tricks won beyond the bid (bags) get their own color.
+ */
+function WonPile({ bid, won }: { bid: number | undefined; won: number }) {
+  if (bid === undefined) return null;
+  const slots = Math.max(bid, won);
+  if (slots === 0) return null;
+
+  return (
+    <div className="won-pile" aria-label={`Won ${won} of ${bid} bid`}>
+      {Array.from({ length: slots }, (_, i) => {
+        let state = 'needed';
+        if (i < won) state = i < bid ? 'won' : 'bag';
+        return <span key={i} className={`won-pile__slot won-pile__slot--${state}`} />;
+      })}
+    </div>
+  );
+}
+
 function SeatBadge({ round, playerId }: { round: InteractiveRoundState; playerId: PlayerId }) {
   const seat = SEATS[playerId];
-  const isTurn = round.currentPlayer === playerId;
+  const isTurn = round.currentPlayer === playerId && !round.roundOver;
   const cardCount = round.hands[playerId].length;
   const isBot = playerId !== 0;
 
@@ -27,6 +48,7 @@ function SeatBadge({ round, playerId }: { round: InteractiveRoundState; playerId
         {round.dealerId === playerId && <span className="chip chip--dealer">Dealer</span>}
       </div>
       <div className="seat__bid">{bidText(round, playerId)}</div>
+      <WonPile bid={round.bids[playerId]} won={round.tricksWonByPlayer[playerId]} />
       {isBot && (
         <div className="seat__cards" aria-label={`${cardCount} cards`}>
           <div className="seat__fan">
@@ -41,7 +63,7 @@ function SeatBadge({ round, playerId }: { round: InteractiveRoundState; playerId
   );
 }
 
-function TrickCards({
+export function TrickCards({
   plays,
   size,
   winnerId = null,
@@ -79,55 +101,29 @@ function CurrentTrick({ round, heldTrick }: { round: InteractiveRoundState; held
   );
 }
 
-function LastTrick({ trick }: { trick: Trick | undefined }) {
-  return (
-    <div className="last-trick" aria-label="Last trick">
-      <div className="last-trick__title">Last trick</div>
-      {trick ? (
-        <>
-          <div className="trick trick--mini">
-            <TrickCards plays={trick.plays} size="sm" />
-          </div>
-          <div className="last-trick__winner">
-            {trick.winnerId !== null && `${SEATS[trick.winnerId].name} won`}
-          </div>
-        </>
-      ) : (
-        <div className="last-trick__empty">None yet</div>
-      )}
-    </div>
-  );
-}
-
 interface TableProps {
   round: InteractiveRoundState;
   /**
    * True while the just-finished trick is held in the center so it can be
-   * seen; "Last trick" then shows the one before it, so no card is on screen twice.
+   * seen (the side panel's "Last trick" then shows the one before it, so no
+   * card is on screen twice).
    */
   holdingTrick?: boolean;
+  /** Floats over the middle of the felt — used for the bidding panel. */
+  overlay?: ReactNode;
 }
 
-export function Table({ round, holdingTrick = false }: TableProps) {
+export function Table({ round, holdingTrick = false, overlay }: TableProps) {
   const tricksPlayed = round.completedTricks.length;
   const heldTrick = holdingTrick ? round.completedTricks[tricksPlayed - 1] : undefined;
-  const lastTrick = round.completedTricks[tricksPlayed - (holdingTrick ? 2 : 1)];
 
   return (
     <div className="table">
-      <div className="table__info">
-        <div>
-          Trick {Math.min(tricksPlayed + (holdingTrick ? 0 : 1), 13)} of 13
-        </div>
-        <div className={`chip ${round.spadesBroken ? 'chip--broken' : ''}`}>
-          ♠ {round.spadesBroken ? 'broken' : 'not broken'}
-        </div>
-      </div>
       {PLAYER_IDS.map((id) => (
         <SeatBadge key={id} round={round} playerId={id} />
       ))}
       <CurrentTrick round={round} heldTrick={heldTrick} />
-      <LastTrick trick={lastTrick} />
+      {overlay && <div className="table__overlay">{overlay}</div>}
     </div>
   );
 }

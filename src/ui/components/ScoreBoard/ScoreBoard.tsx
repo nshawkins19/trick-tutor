@@ -58,6 +58,8 @@ export function ScoreBoard({ teams, roundNumber, winningScore, onNewGame, round 
 function SettingsMenu({ onNewGame }: { onNewGame: () => void }) {
   const skipBotTurns = useSettingsStore((s) => s.skipBotTurns);
   const setSkipBotTurns = useSettingsStore((s) => s.setSkipBotTurns);
+  const showCoaching = useSettingsStore((s) => s.showCoaching);
+  const setShowCoaching = useSettingsStore((s) => s.setShowCoaching);
 
   return (
     <details className="settings">
@@ -69,6 +71,17 @@ function SettingsMenu({ onNewGame }: { onNewGame: () => void }) {
       </summary>
       <div className="settings__panel">
         <label className="switch">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={showCoaching}
+            onChange={(e) => setShowCoaching(e.target.checked)}
+          />
+          <span className="switch__track" aria-hidden="true" />
+          <span className="switch__label">Coaching tips</span>
+        </label>
+        <p className="settings__help">Suggested bids and hints about which cards you can play, and why.</p>
+        <label className="switch settings__item">
           <input
             type="checkbox"
             role="switch"

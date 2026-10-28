@@ -8,17 +8,19 @@ interface BiddingPanelProps {
   /** Collapsed shows just a small "Your bid" pill so the table and your hand are visible. */
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  /** Show the suggested bid and how it was worked out. */
+  coaching: boolean;
 }
 
 const BID_OPTIONS = Array.from({ length: MAX_BID - MIN_BID + 1 }, (_, i) => MIN_BID + i);
 
-export function BiddingPanel({ round, onBid, collapsed, onToggleCollapsed }: BiddingPanelProps) {
-  const suggested = estimateBid(round.hands[HUMAN_PLAYER]);
+export function BiddingPanel({ round, onBid, collapsed, onToggleCollapsed, coaching }: BiddingPanelProps) {
+  const suggested = coaching ? estimateBid(round.hands[HUMAN_PLAYER]) : null;
 
   if (collapsed) {
     return (
       <button type="button" className="bidding-pill" onClick={onToggleCollapsed} aria-expanded="false">
-        Your bid · suggested {suggested} <span aria-hidden="true">▴</span>
+        Your bid{suggested !== null && ` · suggested ${suggested}`} <span aria-hidden="true">▴</span>
       </button>
     );
   }
@@ -59,10 +61,12 @@ export function BiddingPanel({ round, onBid, collapsed, onToggleCollapsed }: Bid
           </button>
         ))}
       </div>
-      <p className="bidding__hint">
-        <strong>Suggested: {suggested}.</strong> Count about one trick for each Ace and King, one for the Q♠, and
-        one for every spade beyond your third.
-      </p>
+      {suggested !== null && (
+        <p className="bidding__hint">
+          <strong>Suggested: {suggested}.</strong> Count about one trick for each Ace and King, one for the Q♠, and
+          one for every spade beyond your third.
+        </p>
+      )}
     </div>
   );
 }

@@ -511,6 +511,11 @@
   align-items: center;
 }
 
+/* Rows only matter on tall phones; everywhere else they flatten into one fanned line. */
+.hand__row {
+  display: contents;
+}
+
 .status-line {
   min-height: 1.5em;
   margin-top: 4px;
@@ -1103,6 +1108,32 @@
   }
 }
 
+/* Tall portrait phones: there's spare height, so the hand stacks into two
+   overlapping rows (each card ~100px instead of ~75px) and the trick grows. */
+@media (orientation: portrait) and (max-width: 900px) and (min-height: 700px) {
+  .table {
+    --card-md: min(76px, 18vw, 9svh);
+  }
+  .player-area {
+    /* 7 cards per row overlapping half of each other = 4 card widths per row. */
+    --hand-overlap: 0.5;
+    --card-md: min(100px, calc((100cqi - 8px) / 4), 12.5svh);
+  }
+  .hand {
+    flex-direction: column;
+    align-items: center;
+    padding-left: 0;
+  }
+  .hand__row {
+    display: flex;
+    padding-left: calc(var(--card-md) * var(--hand-overlap));
+  }
+  /* The second row covers the bottom ~55% of the first; corner indexes stay visible. */
+  .hand__row + .hand__row {
+    margin-top: calc(var(--card-md) * -0.77);
+  }
+}
+
 /* Short portrait phones (iPhone SE-sized with toolbars): smaller trick, and the
    corner "Last trick" drops its title and winner text (the gold outline marks the winner). */
 @media (orientation: portrait) and (max-width: 900px) and (max-height: 640px) {
@@ -1113,4 +1144,8 @@
   .table .last-trick__winner {
     display: none;
   }
+}
+
+.settings__item {
+  margin-top: 14px;
 }

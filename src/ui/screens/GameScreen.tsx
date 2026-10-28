@@ -53,7 +53,7 @@ function useRoundPacing(round: InteractiveRoundState): boolean {
   return holdingTrick;
 }
 
-function statusText(round: InteractiveRoundState, holdingTrick: boolean): string {
+function statusText(round: InteractiveRoundState, holdingTrick: boolean, coaching: boolean): string {
   if (holdingTrick) {
     const winnerId = round.completedTricks[round.completedTricks.length - 1].winnerId;
     return winnerId === HUMAN_PLAYER ? 'You won the trick!' : `${SEATS[winnerId ?? 0].name} won the trick.`;
@@ -63,6 +63,7 @@ function statusText(round: InteractiveRoundState, holdingTrick: boolean): string
       ? `${SEATS[round.currentPlayer].name} is bidding…`
       : `${SEATS[round.currentPlayer].name} is playing…`;
   }
+  if (!coaching) return round.leadSuit === null ? 'Your lead.' : 'Your turn.';
   return explainLegalPlays(round.hands[HUMAN_PLAYER], round.leadSuit, round.spadesBroken);
 }
 
@@ -70,6 +71,7 @@ function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scor
   const placeBid = useGameStore((s) => s.placeBid);
   const playCard = useGameStore((s) => s.playCard);
   const holdingTrick = useRoundPacing(round);
+  const coaching = useSettingsStore((s) => s.showCoaching);
   const [biddingCollapsed, setBiddingCollapsed] = useState(false);
   const myHand = round.hands[HUMAN_PLAYER];
   const myTurn = round.currentPlayer === HUMAN_PLAYER && !round.roundOver && !holdingTrick;
@@ -84,6 +86,7 @@ function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scor
         onBid={onBid}
         collapsed={biddingCollapsed}
         onToggleCollapsed={() => setBiddingCollapsed((c) => !c)}
+        coaching={coaching}
       />
     ) : undefined;
 
@@ -98,7 +101,7 @@ function ActiveRound({ round, scoreboard }: { round: InteractiveRoundState; scor
         />
         <div className="player-area">
           <p className="status-line" role="status">
-            {round.phase === 'bidding' && myTurn ? 'Your bid — use the panel on the table.' : statusText(round, holdingTrick)}
+            {round.phase === 'bidding' && myTurn ? 'Your bid — use the panel on the table.' : statusText(round, holdingTrick, coaching)}
           </p>
           {round.phase === 'playing' && myTurn ? (
             <Hand cards={myHand} legal={legalPlaysForCurrentPlayer(round)} onPlay={onPlay} />

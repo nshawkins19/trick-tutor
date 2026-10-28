@@ -5,6 +5,9 @@ interface SettingsStore {
   /** Bots play instantly instead of one move at a time, and finished tricks aren't held on the table. */
   skipBotTurns: boolean;
   setSkipBotTurns: (skip: boolean) => void;
+  /** The teacher: suggested bids and "why can't I play that?" hints. */
+  showCoaching: boolean;
+  setShowCoaching: (show: boolean) => void;
 }
 
 // Per-browser preferences, kept in localStorage so they survive a reload.
@@ -13,6 +16,8 @@ export const useSettingsStore = create<SettingsStore>()(
     (set) => ({
       skipBotTurns: false,
       setSkipBotTurns: (skip) => set({ skipBotTurns: skip }),
+      showCoaching: true,
+      setShowCoaching: (show) => set({ showCoaching: show }),
     }),
     {
       name: 'trick-tutor-settings',
